@@ -4,30 +4,48 @@ function AddNodeButton({ onAdd }) {
   const [isModalOpen, setIsModalOpen] = useState(false); // Состояние модального окна
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Создаем рефы для полей ввода
   const nameInputRef = useRef(null);
   const descriptionInputRef = useRef(null);
 
   // Обработчик отправки формы
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (name.trim() === '') return; // Проверяем, что название не пустое
-    onAdd({ name, description }); // Вызываем функцию добавления узла
-    setIsModalOpen(false); // Закрываем модальное окно
-    setName('');
-    setDescription('');
+    try {
+      setIsSubmitting(true);
+      setErrorMessage('');
+      await onAdd({
+        name: name.trim(),
+        description: description.trim(),
+      });
+      setIsModalOpen(false); // Закрываем модальное окно
+      setName('');
+      setDescription('');
+    } catch (error) {
+      setErrorMessage(error.message || 'Не удалось создать узел');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Обработчик закрытия модального окна
   const handleClose = () => {
+    if (isSubmitting) {
+      return;
+    }
     setIsModalOpen(false);
     setName('');
     setDescription('');
+    setErrorMessage('');
   };
 
   // Обработчик открытия модального окна
   const handleOpenModal = () => {
     setIsModalOpen(true);
+    setErrorMessage('');
     // Устанавливаем фокус на поле ввода "Название" после открытия модального окна
     setTimeout(() => {
       if (nameInputRef.current) {
@@ -81,9 +99,14 @@ function AddNodeButton({ onAdd }) {
               ref={descriptionInputRef} // Привязываем реф к полю ввода "Описание"
               onKeyDown={handleDescriptionKeyDown} // Обработчик нажатий клавиш
             />
+            {errorMessage ? (
+              <p className="modal-error-message">{errorMessage}</p>
+            ) : null}
             <div className="modal-buttons">
-              <button onClick={handleSubmit}>Да</button>
-              <button onClick={handleClose}>Нет</button>
+              <button onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'Сохранение...' : 'Да'}
+              </button>
+              <button onClick={handleClose} disabled={isSubmitting}>Нет</button>
             </div>
           </div>
         </div>

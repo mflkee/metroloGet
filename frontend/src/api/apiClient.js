@@ -1,7 +1,17 @@
 import axios from "axios";
 
+const defaultApiBaseUrl =
+  process.env.REACT_APP_API_URL ||
+  `${window.location.protocol}//${window.location.hostname || '127.0.0.1'}:8000`;
+
+const getErrorMessage = (error, fallbackMessage) =>
+  error.response?.data?.detail ||
+  error.response?.data?.message ||
+  error.message ||
+  fallbackMessage;
+
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: defaultApiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,7 +23,7 @@ export const fetchNodes = async () => {
     const response = await apiClient.get('/nodes/');
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при получении узлов");
+    throw new Error(getErrorMessage(error, "Ошибка при получении узлов"));
   }
 };
 
@@ -22,7 +32,7 @@ export const createNode = async (nodeData) => {
     const response = await apiClient.post('/nodes/', nodeData);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при создании узла");
+    throw new Error(getErrorMessage(error, "Ошибка при создании узла"));
   }
 };
 
@@ -31,16 +41,18 @@ export const deleteNode = async (nodeId) => {
     const response = await apiClient.delete(`/nodes/${nodeId}`);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при удалении узла");
+    throw new Error(getErrorMessage(error, "Ошибка при удалении узла"));
   }
 };
 
 export const searchNodes = async (query) => {
   try {
-    const response = await apiClient.get(`/nodes/search/?query=${query}`);
+    const response = await apiClient.get('/nodes/search/', {
+      params: { query },
+    });
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при поиске узлов");
+    throw new Error(getErrorMessage(error, "Ошибка при поиске узлов"));
   }
 };
 
@@ -49,7 +61,7 @@ export const fetchNode = async (nodeId) => {
     const response = await apiClient.get(`/nodes/${nodeId}`);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при получении данных узла");
+    throw new Error(getErrorMessage(error, "Ошибка при получении данных узла"));
   }
 };
 
@@ -59,7 +71,7 @@ export const fetchInstrumentsByNode = async (nodeId) => {
     const response = await apiClient.get(`/instruments/${nodeId}/`);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при получении СИ");
+    throw new Error(getErrorMessage(error, "Ошибка при получении СИ"));
   }
 };
 
@@ -68,7 +80,7 @@ export const searchAndAddInstrument = async (nodeId, searchParams) => {
     const response = await apiClient.get(`/instruments/${nodeId}/search_instruments/`, { params: searchParams });
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при добавлении СИ");
+    throw new Error(getErrorMessage(error, "Ошибка при добавлении СИ"));
   }
 };
 
@@ -77,7 +89,7 @@ export const deleteInstrument = async (instrumentId, nodeId) => {
     const response = await apiClient.delete(`/instruments/${instrumentId}/${nodeId}`);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при удалении СИ");
+    throw new Error(getErrorMessage(error, "Ошибка при удалении СИ"));
   }
 };
 
@@ -87,7 +99,7 @@ export const createGroup = async (nodeId, groupData) => {
     const response = await apiClient.post(`/groups/${nodeId}/`, groupData);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при создании группы");
+    throw new Error(getErrorMessage(error, "Ошибка при создании группы"));
   }
 };
 
@@ -96,7 +108,7 @@ export const fetchGroupsByNode = async (nodeId) => {
     const response = await apiClient.get(`/groups/${nodeId}/`);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при загрузке групп");
+    throw new Error(getErrorMessage(error, "Ошибка при загрузке групп"));
   }
 };
 
@@ -136,7 +148,7 @@ export const fetchInstrumentsForGroup = async (groupId) => {
     const response = await apiClient.get(`/groups/${groupId}/instruments`);
     return response.data;
   } catch (error) {
-    throw new Error("Ошибка при загрузке инструментов группы");
+    throw new Error(getErrorMessage(error, "Ошибка при загрузке инструментов группы"));
   }
 };
 
@@ -157,4 +169,3 @@ export const deleteGroup = async (groupId) => {
     throw new Error(error.response?.data?.detail || "Ошибка удаления группы");
   }
 };
-

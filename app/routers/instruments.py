@@ -24,10 +24,7 @@ def read_instruments_for_node(node_id: int, db: Session = Depends(get_db)):
     Получение всех средств измерений для узла.
     """
     logger.info(f"Получение средств измерений для узла с ID={node_id}")
-    instruments = crud.get_instruments_by_node(db, node_id)
-    if not instruments:
-        raise HTTPException(status_code=404, detail="Instruments not found for this node")
-    return instruments
+    return crud.get_instruments_by_node(db, node_id)
 
 @router.delete("/{instrument_id}/{node_id}")
 def delete_instrument(instrument_id: int, node_id: int, db: Session = Depends(get_db)):
